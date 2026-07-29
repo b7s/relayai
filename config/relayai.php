@@ -17,14 +17,54 @@ return [
         ? json_decode((string) env('RELAYAI_ENTRIES'), true, flags: JSON_THROW_ON_ERROR)
         : [
             [
-                'provider' => 'openai',
-                'model' => 'gpt-5',
-                'api_key' => env('RELAYAI_API_KEY_1'),
+                'provider' => 'nvidia',
+                'model' => 'z-ai/glm-5.2',
+                'api_key' => env('NVIDIA_KEY_1'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'z-ai/glm-5.2',
+                'api_key' => env('NVIDIA_KEY_2'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'minimaxai/minimax-m3',
+                'api_key' => env('NVIDIA_KEY_1'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'minimaxai/minimax-m3',
+                'api_key' => env('NVIDIA_KEY_2'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'deepseek-ai/deepseek-v4-flash',
+                'api_key' => env('NVIDIA_KEY_1'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'deepseek-ai/deepseek-v4-flash',
+                'api_key' => env('NVIDIA_KEY_2'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'deepseek-ai/deepseek-v4-flash',
+                'api_key' => env('NVIDIA_KEY_1'),
+            ],
+            [
+                'provider' => 'nvidia',
+                'model' => 'deepseek-ai/deepseek-v4-flash',
+                'api_key' => env('NVIDIA_KEY_2'),
             ],
             [
                 'provider' => 'openrouter',
-                'model' => 'deepseek/deepseek-chat',
-                'api_key' => env('RELAYAI_API_KEY_2'),
+                'model' => 'tencent/hy3',
+                'api_key' => env('OPENROUTER_KEY_1'),
+            ],
+            [
+                'provider' => 'openrouter',
+                'model' => 'deepseek/deepseek-v4-flash',
+                'api_key' => env('OPENROUTER_KEY_1'),
             ],
         ],
 ];
