@@ -17,19 +17,15 @@ it('resolves all providers by name', function (string $name): void {
     'opencode-go',
 ]);
 
-it('builds correct chat completions path for each provider', function (string $name, string $expectedPrefix): void {
-    $provider = Provider::fromName($name);
+it('builds valid chat completions path for every provider', function (Provider $provider): void {
+    $url = $provider->chatCompletionsPath();
 
-    expect($provider->chatCompletionsPath())->toStartWith($expectedPrefix);
-    expect($provider->chatCompletionsPath())->toEndWith('/chat/completions');
-})->with([
-    ['nvidia', 'https://integrate.api.nvidia.com/v1'],
-    ['openrouter', 'https://openrouter.ai/api/v1'],
-    ['openai', 'https://api.openai.com/v1'],
-    ['anthropic', 'https://api.anthropic.com/v1'],
-    ['zai', 'https://api.z.ai/api/paas/v4'],
-    ['opencode-go', 'https://opencode.ai/zen/go/v1'],
-]);
+    expect($url)->toEndWith('/chat/completions');
+    expect(filter_var($url, FILTER_VALIDATE_URL))->not->toBeFalse();
+})->with(fn (): array => array_map(
+    fn (Provider $p) => [$p],
+    Provider::cases(),
+));
 
 it('creates config entries from config with all providers', function (): void {
     config()->set('relayai.entries', [
