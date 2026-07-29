@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\Routing\ConfigEntry;
 use App\Enums\Provider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -11,20 +12,16 @@ final class HealthController extends Controller
 {
     public function index(): JsonResponse
     {
-        /** @var array<int, array<string, mixed>> $entries */
-        $entries = config('relayai.entries', []);
         $providers = [];
 
-        foreach ($entries as $entry) {
-            $provider = isset($entry['provider']) && is_string($entry['provider']) ? $entry['provider'] : '';
-            $model = isset($entry['model']) && is_string($entry['model']) ? $entry['model'] : '';
-            $key = "{$provider}:{$model}";
+        foreach (ConfigEntry::all() as $entry) {
+            $key = "{$entry->provider}:{$entry->model}";
 
             if (! isset($providers[$key])) {
                 $providers[$key] = [
-                    'provider' => $provider,
-                    'model' => $model,
-                    'reachable' => $this->checkProvider($provider),
+                    'provider' => $entry->provider,
+                    'model' => $entry->model,
+                    'reachable' => $this->checkProvider($entry->provider),
                 ];
             }
         }

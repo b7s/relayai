@@ -95,7 +95,7 @@ Built following the Laravel Statecraft patterns (bounded context, explicit trans
 
 ```bash
 ./vendor/bin/pest --parallel
-./vendor/bin/phpstan analyse --level 6
+./vendor/bin/phpstan analyse --level max
 ./vendor/bin/pint
 ./vendor/bin/catraca
 ```

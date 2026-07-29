@@ -20,7 +20,7 @@
             "tls_verification": true,
             "insecure_rng": true,
             "gitignore_sensitive": true,
-            "package_freshness": true,
+            "package_freshness": false,
             "weak_cryptography": true,
             "cors_config": true,
             "npm_audit": true
@@ -38,7 +38,7 @@
         "percentage": 85
     },
     "duplication": {
-        "percentage": 2,
+        "percentage": 0,
         "clones": [],
         "min_lines": 3,
         "min_tokens": 30
@@ -76,5 +76,5 @@
         "enabled": true
     },
     "created_at": "+2026-07-29T15:03:31+00:00",
-    "updated_at": "2026-07-29T15:07:36+00:00"
+    "updated_at": "2026-07-29T17:30:09+00:00"
 }

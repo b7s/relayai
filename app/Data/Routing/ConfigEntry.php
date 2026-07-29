@@ -35,4 +35,18 @@ readonly class ConfigEntry
     {
         return "{$this->provider}:{$this->model}:{$this->apiKeyMask}";
     }
+
+    /**
+     * @return array<int, self>
+     */
+    public static function all(): array
+    {
+        /** @var array<int, array<string, mixed>> $entries */
+        $entries = config('relayai.entries', []);
+
+        return array_map(
+            static fn (array $entry): self => self::fromArray($entry),
+            $entries,
+        );
+    }
 }
