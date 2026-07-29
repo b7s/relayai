@@ -13,5 +13,18 @@ return [
 
     'cooldown_minutes' => (int) env('RELAYAI_COOLDOWN_MINUTES', 15),
 
-    'entries' => json_decode((string) env('RELAYAI_ENTRIES', '[]'), true, flags: JSON_THROW_ON_ERROR),
+    'entries' => env('RELAYAI_ENTRIES')
+        ? json_decode((string) env('RELAYAI_ENTRIES'), true, flags: JSON_THROW_ON_ERROR)
+        : [
+            [
+                'provider' => 'openai',
+                'model' => 'gpt-5',
+                'api_key' => env('RELAYAI_API_KEY_1'),
+            ],
+            [
+                'provider' => 'openrouter',
+                'model' => 'deepseek/deepseek-chat',
+                'api_key' => env('RELAYAI_API_KEY_2'),
+            ],
+        ],
 ];
