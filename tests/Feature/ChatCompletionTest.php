@@ -12,7 +12,7 @@ beforeEach(function (): void {
 
 it('returns 200 on successful chat completion', function (): void {
     Http::fake([
-        'integrate.api.nvidia.com/*' => Http::response([
+        '*integrate.api.nvidia.com/*' => Http::response([
             'id' => 'cmpl-test',
             'object' => 'chat.completion',
             'choices' => [['message' => ['role' => 'assistant', 'content' => 'Hello']]],
@@ -63,7 +63,7 @@ it('returns 422 on invalid request', function (): void {
 
 it('has X-Request-ID header on response', function (): void {
     Http::fake([
-        'integrate.api.nvidia.com/*' => Http::response([
+        '*integrate.api.nvidia.com/*' => Http::response([
             'id' => 'cmpl-test',
             'object' => 'chat.completion',
             'choices' => [['message' => ['role' => 'assistant', 'content' => 'Hello']]],
@@ -82,7 +82,7 @@ it('can stream chat completion', function (): void {
     $sseBody = "data: {\"id\":\"cmpl-1\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"delta\":{\"role\":\"assistant\",\"content\":\"Hello\"},\"index\":0}]}\n\ndata: {\"id\":\"cmpl-1\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"delta\":{\"content\":\" world\"},\"index\":0}]}\n\ndata: [DONE]\n\n";
 
     Http::fake([
-        'integrate.api.nvidia.com/*' => Http::response($sseBody, 200),
+        '*integrate.api.nvidia.com/*' => Http::response($sseBody, 200),
     ]);
 
     $response = $this->postJson('/v1/chat/completions', [

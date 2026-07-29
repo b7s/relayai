@@ -27,7 +27,7 @@ final class ChatCompletionController extends Controller
         $result = $router->chat($data);
 
         return response()->json(
-            json_decode($result->body, true, flags: JSON_THROW_ON_ERROR),
+            json_decode((string) $result->body, true, flags: JSON_THROW_ON_ERROR),
         );
     }
 

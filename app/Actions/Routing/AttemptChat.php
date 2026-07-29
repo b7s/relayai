@@ -12,11 +12,11 @@ final readonly class AttemptChat
 {
     public function __invoke(ConfigEntry $entry, ChatRequestData $request): AttemptResult
     {
-        $url = $this->buildUrl($entry->provider, $entry->model);
+        $url = $this->buildUrl($entry->provider);
 
         try {
             $response = Http::withToken($entry->apiKey)
-                ->timeout(config('relayai.timeout_seconds', 60))
+                ->timeout(config()->float('relayai.timeout_seconds', 60))
                 ->withOptions([
                     'stream' => $request->stream,
                     'http_errors' => false,
@@ -46,8 +46,10 @@ final readonly class AttemptChat
             );
         }
 
-        $body = $response->json();
-        $errorMessage = $body['error']['message'] ?? $response->reason();
+        $json = $response->json();
+        $errorMessage = is_array($json) && is_array($json['error'] ?? null) && is_string($json['error']['message'])
+            ? $json['error']['message']
+            : (string) $response->reason();
 
         return new AttemptResult(
             success: false,
@@ -61,10 +63,8 @@ final readonly class AttemptChat
         );
     }
 
-    public function buildUrl(string $provider, string $model): string
+    public function buildUrl(string $provider): string
     {
-        $baseUrl = Provider::fromName($provider)->baseUrl();
-
-        return rtrim($baseUrl, '/').'/v1/chat/completions';
+        return Provider::fromName($provider)->chatCompletionsPath();
     }
 }

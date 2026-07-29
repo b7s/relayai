@@ -6,9 +6,9 @@ use App\Http\Controllers\ModelsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
-    Route::post('chat/completions', ChatCompletionController::class);
-    Route::get('models', ModelsController::class);
-    Route::get('health', [HealthController::class, 'index']);
+    Route::post('chat/completions', ChatCompletionController::class)->name('chat.completions');
+    Route::get('models', ModelsController::class)->name('models');
+    Route::get('health', [HealthController::class, 'index'])->name('health');
 });
 
-Route::get('up', [HealthController::class, 'up']);
+Route::get('up', [HealthController::class, 'up'])->name('up');

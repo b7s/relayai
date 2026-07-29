@@ -42,7 +42,9 @@ final readonly class Router
 
         foreach ($entries as $entry) {
             $streamResult = $this->tryEntryStream($entry, $request, $onChunk);
+            /** @var bool $entrySuccess */
             $entrySuccess = $streamResult[0];
+            /** @var AttemptResult|null $entryResult */
             $entryResult = $streamResult[2];
 
             if ($entrySuccess) {
@@ -54,16 +56,18 @@ final readonly class Router
             }
         }
 
-        $message = $lastFailedResult !== null ?
-            $lastFailedResult->errorMessage :
-            'All providers failed during streaming';
+        $message = $lastFailedResult !== null
+            ? ($lastFailedResult->errorMessage ?? 'All providers failed during streaming')
+            : 'All providers failed during streaming';
 
         throw new AllProvidersFailedException($message);
     }
 
     private function tryEntry(ConfigEntry $entry, ChatRequestData $request): AttemptResult
     {
-        for ($i = 0; $i < config('relayai.retries', 3); $i++) {
+        $maxRetries = config()->integer('relayai.retries', 3);
+
+        for ($i = 0; $i < $maxRetries; $i++) {
             $result = ($this->attemptChat)($entry, $request);
 
             if ($result->success) {
@@ -90,15 +94,16 @@ final readonly class Router
     private function tryEntryStream(ConfigEntry $entry, ChatRequestData $request, callable $onChunk): array
     {
         $model = $request->raw['model'] ?? $entry->model;
-        $url = ($this->attemptChat)->buildUrl($entry->provider, $entry->model);
+        $url = ($this->attemptChat)->buildUrl($entry->provider);
+        $maxRetries = config()->integer('relayai.retries', 3);
 
-        for ($i = 0; $i < config()->integer('relayai.retries', 3); $i++) {
+        for ($i = 0; $i < $maxRetries; $i++) {
             $payload = $request->toUpstreamPayload();
             $payload['model'] = $model;
 
             try {
                 $response = Http::withToken($entry->apiKey)
-                    ->timeout(config('relayai.timeout_seconds', 60))
+                    ->timeout(config()->float('relayai.timeout_seconds', 60))
                     ->withOptions(['stream' => true, 'http_errors' => false])
                     ->post($url, $payload);
             } catch (\Throwable $e) {
@@ -116,13 +121,15 @@ final readonly class Router
             }
 
             if ($response->status() !== 200) {
-                $body = $response->json();
-                $errorMsg = $body['error']['message'] ?? $response->reason();
+                $json = $response->json();
+                $errorMessage = is_array($json) && is_array($json['error'] ?? null) && is_string($json['error']['message'])
+                    ? $json['error']['message']
+                    : (string) $response->reason();
                 $result = new AttemptResult(
                     success: false,
                     body: $response->body(),
                     statusCode: $response->status(),
-                    errorMessage: $errorMsg,
+                    errorMessage: $errorMessage,
                     retryable: true,
                     provider: $entry->provider,
                     model: $entry->model,
@@ -197,7 +204,7 @@ final readonly class Router
     private function resolveEntries(ChatRequestData $request): array
     {
         /** @var array<int, array<string, mixed>> $raw */
-        $raw = config('relayai.entries', []);
+        $raw = config()->array('relayai.entries', []);
         $entries = [];
 
         foreach ($raw as $item) {
@@ -215,9 +222,9 @@ final readonly class Router
 
     private function isInCooldown(ConfigEntry $entry): bool
     {
-        $window = (int) config('relayai.window_minutes', 1);
-        $cooldown = (int) config('relayai.cooldown_minutes', 15);
-        $maxFailures = (int) config('relayai.max_failures', 3);
+        $window = config()->integer('relayai.window_minutes', 1);
+        $cooldown = config()->integer('relayai.cooldown_minutes', 15);
+        $maxFailures = config()->integer('relayai.max_failures', 3);
 
         $recentCount = ProviderFailure::recentFailures(
             $entry->provider,
@@ -287,6 +294,26 @@ final readonly class Router
             return '';
         }
 
-        return $data['choices'][0]['delta']['content'] ?? '';
+        $choices = $data['choices'] ?? null;
+
+        if (! is_array($choices) || ! isset($choices[0])) {
+            return '';
+        }
+
+        $firstChoice = $choices[0];
+
+        if (! is_array($firstChoice)) {
+            return '';
+        }
+
+        $delta = $firstChoice['delta'] ?? null;
+
+        if (! is_array($delta)) {
+            return '';
+        }
+
+        $content = $delta['content'] ?? null;
+
+        return is_string($content) ? $content : '';
     }
 }

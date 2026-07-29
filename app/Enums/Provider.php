@@ -15,6 +15,14 @@ enum Provider: string
         };
     }
 
+    /**
+     * Upstream OpenAI-compatible chat completions path for this provider.
+     */
+    public function chatCompletionsPath(): string
+    {
+        return $this->baseUrl().'/v1/chat/completions';
+    }
+
     public static function fromName(string $name): self
     {
         return match (strtolower($name)) {

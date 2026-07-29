@@ -22,12 +22,19 @@ readonly class ChatRequestData
      */
     public static function fromRequest(array $payload): self
     {
+        $model = isset($payload['model']) && is_string($payload['model']) ? $payload['model'] : '';
+        /** @var array<int, array<string, mixed>> $messages */
+        $messages = isset($payload['messages']) && is_array($payload['messages']) ? $payload['messages'] : [];
+        $temperature = isset($payload['temperature']) && is_numeric($payload['temperature']) ? (float) $payload['temperature'] : null;
+        $maxTokens = isset($payload['max_tokens']) && is_numeric($payload['max_tokens']) ? (int) $payload['max_tokens'] : null;
+        $stream = isset($payload['stream']) ? (bool) $payload['stream'] : false;
+
         return new self(
-            model: $payload['model'] ?? '',
-            messages: $payload['messages'] ?? [],
-            temperature: $payload['temperature'] ?? null,
-            maxTokens: $payload['max_tokens'] ?? null,
-            stream: $payload['stream'] ?? false,
+            model: $model,
+            messages: $messages,
+            temperature: $temperature,
+            maxTokens: $maxTokens,
+            stream: $stream,
             raw: $payload,
         );
     }

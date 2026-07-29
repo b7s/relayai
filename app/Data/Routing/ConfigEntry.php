@@ -12,18 +12,20 @@ readonly class ConfigEntry
     ) {}
 
     /**
-     * @param  array<string, string>  $entry
+     * @param  array<string, mixed>  $entry
      */
     public static function fromArray(array $entry): self
     {
-        $key = $entry['api_key'] ?? '';
+        $provider = isset($entry['provider']) && is_string($entry['provider']) ? $entry['provider'] : '';
+        $model = isset($entry['model']) && is_string($entry['model']) ? $entry['model'] : '';
+        $key = isset($entry['api_key']) && is_string($entry['api_key']) ? $entry['api_key'] : '';
         $mask = strlen($key) > 8
             ? substr($key, 0, 4).'...'.substr($key, -4)
             : substr($key, 0, 4).'...';
 
         return new self(
-            provider: $entry['provider'],
-            model: $entry['model'],
+            provider: $provider,
+            model: $model,
             apiKey: $key,
             apiKeyMask: $mask,
         );

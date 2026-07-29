@@ -5,7 +5,7 @@ return [
 
     'retries' => (int) env('RELAYAI_RETRIES', 3),
 
-    'timeout_seconds' => (int) env('RELAYAI_TIMEOUT_SECONDS', 60),
+    'timeout_seconds' => (float) env('RELAYAI_TIMEOUT_SECONDS', 60),
 
     'max_failures' => (int) env('RELAYAI_MAX_FAILURES', 3),
 

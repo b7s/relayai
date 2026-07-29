@@ -6,7 +6,7 @@ it('returns ok on /up', function (): void {
     $response = $this->getJson('/up');
 
     $response->assertStatus(200);
-    $response->assertJson(['status' => 'up']);
+    $response->assertJson(['status' => 'ok']);
 });
 
 it('returns degraded when providers unreachable', function (): void {

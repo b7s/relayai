@@ -15,7 +15,7 @@ beforeEach(function (): void {
 
 it('returns successful response on first entry', function (): void {
     Http::fake([
-        'integrate.api.nvidia.com/*' => Http::response(['choices' => [['message' => ['content' => 'Hello']]]]),
+        '*integrate.api.nvidia.com/*' => Http::response(['choices' => [['message' => ['content' => 'Hello']]]]),
     ]);
 
     config()->set('relayai.entries', [
@@ -37,8 +37,8 @@ it('returns successful response on first entry', function (): void {
 
 it('fails over to next entry when first fails', function (): void {
     Http::fake([
-        'integrate.api.nvidia.com/*' => Http::response(['error' => ['message' => 'Rate limit']], 429),
-        'openrouter.ai/api/*' => Http::response(['choices' => [['message' => ['content' => 'Hello from OR']]]]),
+        '*integrate.api.nvidia.com/*' => Http::response(['error' => ['message' => 'Rate limit']], 429),
+        '*openrouter.ai/*' => Http::response(['choices' => [['message' => ['content' => 'Hello from OR']]]]),
     ]);
 
     config()->set('relayai.entries', [
@@ -114,7 +114,7 @@ it('skips entries in cooldown', function (): void {
     ]);
 
     Http::fake([
-        'openrouter.ai/api/*' => Http::response(['choices' => [['message' => ['content' => 'OR fallback']]]]),
+        '*openrouter.ai/*' => Http::response(['choices' => [['message' => ['content' => 'OR fallback']]]]),
     ]);
 
     config()->set('relayai.entries', [

@@ -10,10 +10,13 @@ final readonly class GatewayKey
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $key = config('relayai.gateway_key');
+        $key = config()->string('relayai.gateway_key', '');
 
-        if ($key === null || $key === '') {
-            return $next($request);
+        if ($key === '') {
+            /** @var Response $response */
+            $response = $next($request);
+
+            return $response;
         }
 
         $provided = $request->bearerToken();
@@ -27,6 +30,9 @@ final readonly class GatewayKey
             ], 401);
         }
 
-        return $next($request);
+        /** @var Response $response */
+        $response = $next($request);
+
+        return $response;
     }
 }
