@@ -63,21 +63,52 @@ You may repeat the same provider/model with a different key to rotate quotas.
 
 ## Using with opencode
 
-In your opencode config, add a custom provider:
+### Automatic setup (recommended)
+
+Run the installer to add/update the `relayai` provider in your opencode config:
+
+```bash
+php artisan relayai:install-opencode
+```
+
+By default it writes to `~/.config/opencode/opencode.jsonc`. Use `--path` to target a different file.
+
+The command reads `APP_URL` and `RELAYAI_GATEWAY_KEY` from your environment and updates:
+
+- `baseURL` → `APP_URL/v1`
+- `apiKey` → the gateway key (or empty if unset)
+
+Existing `npm`, `name`, and `models` are preserved. If the provider doesn't exist, it's created with sensible defaults (`npm: "@ai-sdk/openai-compatible"`, `name: "RelayAI"`).
+
+### Manual config
+
+Alternatively, add a custom provider in your opencode config:
 
 ```json
 {
-  "providers": {
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
     "relayai": {
-      "type": "openai",
-      "baseUrl": "http://localhost:8000/v1",
-      "apiKey": "any-value-or-gateway-key"
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "RelayAI",
+      "options": {
+        "baseURL": "http://localhost:8000/v1",
+        "apiKey": "{env:RELAYAI_GATEWAY_KEY}"
+      },
+      "models": {
+        "deepseek/deepseek-chat": { "name": "DeepSeek Chat (via RelayAI)" }
+      }
     }
   }
 }
 ```
 
-The model name you select in opencode is passed through to RelayAI, which then routes to the first healthy entry (you can mirror the upstream model names in `RELAYAI_ENTRIES`).
+Notes:
+
+- The key is `provider` (singular), not `providers`.
+- `npm: "@ai-sdk/openai-compatible"` is required — it tells opencode to use the OpenAI-compatible AI SDK package (`/v1/chat/completions`). There is no `type` field for providers.
+- `baseURL` (capital `URL`) and `apiKey` live under `options`. Use `{env:RELAYAI_GATEWAY_KEY}` so the key is read from your environment; if `RELAYAI_GATEWAY_KEY` is unset on the gateway side, any value works.
+- The model ID under `models` must match a logical model RelayAI serves — run `curl http://localhost:8000/v1/models` to list them. The selected model name is passed through to RelayAI, which routes to the first healthy entry. Mirror the upstream model names in `RELAYAI_ENTRIES`.
 
 ## Architecture
 
