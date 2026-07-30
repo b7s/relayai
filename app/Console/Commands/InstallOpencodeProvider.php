@@ -32,7 +32,11 @@ final class InstallOpencodeProvider extends Command
         $provider = $this->buildProvider($existing, $baseURL, $apiKey, $models);
 
         if ($this->option('view')) {
-            $this->line(Jsonc::encode(['provider' => ['relayai' => $provider]]));
+            $json = Jsonc::encode(['provider' => ['relayai' => $provider]]);
+            // Remove outer braces for cleaner output
+            $json = trim($json);
+            $json = substr($json, 1, -1);
+            $this->line($json);
             return self::SUCCESS;
         }
 
