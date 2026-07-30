@@ -13,7 +13,7 @@ final class InstallOpencodeProvider extends Command
 
     private const string DEFAULT_NAME = 'RelayAI';
 
-    protected $signature = 'relayai:install-opencode {--path= : Absolute path to opencode.jsonc (default: ~/.config/opencode/opencode.jsonc)}';
+    protected $signature = 'relayai:install-opencode {--path= : Absolute path to opencode.jsonc (default: ~/.config/opencode/opencode.jsonc)} {--view : Only display the provider config without saving}';
 
     protected $description = 'Add or update the relayai provider in the opencode.jsonc config file.';
 
@@ -29,7 +29,14 @@ final class InstallOpencodeProvider extends Command
         $providers = is_array($config['provider'] ?? null) ? $config['provider'] : [];
         $existing = is_array($providers['relayai'] ?? null) ? $providers['relayai'] : [];
 
-        $providers['relayai'] = $this->buildProvider($existing, $baseURL, $apiKey, $models);
+        $provider = $this->buildProvider($existing, $baseURL, $apiKey, $models);
+
+        if ($this->option('view')) {
+            $this->line(Jsonc::encode(['relayai' => $provider]));
+            return self::SUCCESS;
+        }
+
+        $providers['relayai'] = $provider;
         $config['provider'] = $providers;
 
         $this->write($path, $config);
