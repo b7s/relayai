@@ -24,11 +24,12 @@ final class InstallOpencodeProvider extends Command
 
         $baseURL = rtrim(config()->string('app.url', 'http://localhost'), '/').'/v1';
         $apiKey = config()->string('relayai.gateway_key', '');
+        $models = $this->getModelsFromEntries();
 
         $providers = is_array($config['provider'] ?? null) ? $config['provider'] : [];
         $existing = is_array($providers['relayai'] ?? null) ? $providers['relayai'] : [];
 
-        $providers['relayai'] = $this->buildProvider($existing, $baseURL, $apiKey);
+        $providers['relayai'] = $this->buildProvider($existing, $baseURL, $apiKey, $models);
         $config['provider'] = $providers;
 
         $this->write($path, $config);
@@ -36,6 +37,7 @@ final class InstallOpencodeProvider extends Command
         $this->info("Configured 'relayai' provider in: {$path}");
         $this->line("  baseURL: {$baseURL}");
         $this->line('  apiKey: '.($apiKey !== '' ? $this->maskKey($apiKey) : '(empty)'));
+        $this->line('  models: '.implode(', ', array_keys($models)));
 
         return self::SUCCESS;
     }
@@ -105,9 +107,10 @@ final class InstallOpencodeProvider extends Command
 
     /**
      * @param  array<int|string, mixed>  $existing
+     * @param  array<string, string>  $models
      * @return array<int|string, mixed>
      */
-    private function buildProvider(array $existing, string $baseURL, string $apiKey): array
+    private function buildProvider(array $existing, string $baseURL, string $apiKey, array $models): array
     {
         $provider = $existing;
         $provider['npm'] ??= self::DEFAULT_NPM;
@@ -118,7 +121,26 @@ final class InstallOpencodeProvider extends Command
         $options['apiKey'] = $apiKey;
         $provider['options'] = $options;
 
+        if ($models !== []) {
+            $existingModels = is_array($provider['models'] ?? null) ? $provider['models'] : [];
+            $provider['models'] = $models + $existingModels;
+        }
+
         return $provider;
+    }
+
+    /** @return array<string, string> */
+    private function getModelsFromEntries(): array
+    {
+        /** @var array<int, array{provider: string, model: string, api_key?: string}> $entries */
+        $entries = config('relayai.entries', []);
+
+        $models = [];
+        foreach ($entries as $entry) {
+            $models[$entry['model']] = 'RelayAI';
+        }
+
+        return $models;
     }
 
     private function maskKey(string $apiKey): string
