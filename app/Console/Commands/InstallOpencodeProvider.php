@@ -118,7 +118,7 @@ final class InstallOpencodeProvider extends Command
 
     /**
      * @param  array<int|string, mixed>  $existing
-     * @param  array<string, string>  $models
+     * @param  array<string, array{name: string}>  $models
      * @return array<int|string, mixed>
      */
     private function buildProvider(array $existing, string $baseURL, string $apiKey, array $models): array
@@ -140,7 +140,7 @@ final class InstallOpencodeProvider extends Command
         return $provider;
     }
 
-    /** @return array<string, string> */
+    /** @return array<string, array{name: string}> */
     private function getModelsFromEntries(): array
     {
         /** @var array<int, array{provider: string, model: string, api_key?: string}> $entries */
@@ -148,7 +148,7 @@ final class InstallOpencodeProvider extends Command
 
         $models = [];
         foreach ($entries as $entry) {
-            $models[$entry['model']] = 'RelayAI';
+            $models[$entry['model']] = ['name' => $entry['model'].' (via '.$entry['provider'].')'];
         }
 
         return $models;
